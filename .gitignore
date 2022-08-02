@@ -1,0 +1,29 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+#Eclipse
+.classpath
+.project
+.settings/
+
+#Generated
+*.class
+bin
+*.jar
+*.bat
+
+# Ignore Logs
+logs
+*.log
+*.txt
+
+# Ignore the build directory
+/dist
+
+# Ignore Gradle project-specific cache directory
+.gradle
+gradlew
+wrapper
+
+# Ignore Gradle build output directory
+build
