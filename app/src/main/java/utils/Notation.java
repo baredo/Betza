@@ -5,7 +5,8 @@ public class Notation {
 	private static char[] basicComplete;
 	
 	private final static char[] suffix = {'0','1','2','3','4','5','6','7','8','9','@'};
-	
+	private final static char[] prefixDirection = {'f','b','r','l','s','v'};
+	private final static char[] prefixFlag = {'c','m','j','n','p','g'};
 	private final static int[][] posW = {{0,1},{1,0},{-1,0},{0,-1}};
 	private final static int[][] posF = {{1,1},{1,-1},{-1,1},{-1,-1}};
 	private final static int[][] posN = {{2,1},{1,2},{-1,2},{-2,1},{2,-1},{1,-2},{-1,-2},{-2,-1}};

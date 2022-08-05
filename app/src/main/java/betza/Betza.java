@@ -55,11 +55,11 @@ public class Betza {
 	
 	private static ArrayList<Position> addMove(ArrayList<BetzaMove> moveList) {
 		ArrayList<Position> positionList = new ArrayList<Position>();
+		Position flagPositionPrototype;
 		int [][] atomMoves = null;
 		int type = -1;
 		ArrayList<Position> bufferPositionList = new ArrayList<Position>();
 		for(BetzaMove move : moveList) {
-			
 			
 			if(move.atom == 'W') atomMoves = Notation.getPosW();
 			if(move.atom == 'F') atomMoves = Notation.getPosF();
@@ -72,15 +72,22 @@ public class Betza {
 			if(move.atom == 'H') atomMoves = Notation.getPosH();
 			
 			type = getMoveType(move);
-
+			
+			//set prefix flag
+			flagPositionPrototype = setFlagPosition(move);
+			
+			//add temporal atom moves (without filter with direction)
 			for(int[] pos : atomMoves) {
 				if(!positionExist(bufferPositionList, pos) && !positionExist(positionList, pos)) 
-					bufferPositionList.add(new Position(pos,type));		
+					bufferPositionList.add(new Position(pos,type,flagPositionPrototype));		
 			}
 			
+			//filter atom by direction
 			if(move.prefix.length() > 0) { 
 				bufferPositionList= applyPrefix(move.prefix, bufferPositionList);
 			}
+			
+			//add additional atoms by range
 			bufferPositionList = rangeModifier(move.suffix, bufferPositionList,type);
 			for(Position pos : bufferPositionList) {
 				positionList.add(pos);
@@ -196,6 +203,18 @@ public class Betza {
 			}
 			positionListForRemove.clear();
 		}
+		
+		//other type of prefix
+		if(direccion.indexOf('c') == Constants.CAPTURE_YES) {
+			for(Position pos : positionList) {
+				if(Math.abs(pos.x) < Math.abs(pos.y)) positionListForRemove.add(pos);
+			}
+			for(Position pos : positionListForRemove) {
+				positionList.remove(pos);
+			}
+			positionListForRemove.clear();
+		}
+		
 		return positionList;	
 	}
 	
@@ -237,6 +256,44 @@ public class Betza {
 			positionListFinal.add(pos);
 		}
 		return positionListFinal;
+	}
+	
+	private static Position setFlagPosition(BetzaMove move) {
+		Position flagPositionPrototype = new Position();
+		//capture
+		if(move.prefix.contains("m")) {
+			move.prefix = move.prefix.replace("m","");
+			flagPositionPrototype.captureFlag = Constants.CAPTURE_NO;
+		}else if(move.prefix.contains("c")) {
+			move.prefix = move.prefix.replace("c","");
+			flagPositionPrototype.captureFlag = Constants.CAPTURE_YES;
+		}else {
+			flagPositionPrototype.captureFlag = Constants.CAPTURE_BOTH;
+		}
+		
+		//jump
+		if(move.prefix.contains("j")) {
+			move.prefix = move.prefix.replace("j","");
+			flagPositionPrototype.captureFlag = Constants.JUMP_NO;
+		}else if(move.prefix.contains("n")) {
+			move.prefix = move.prefix.replace("n","");
+			flagPositionPrototype.captureFlag = Constants.JUMP_YES;
+		}else {
+			flagPositionPrototype.captureFlag = Constants.JUMP_BOTH;
+		}
+		
+		//slide jump
+		if(move.prefix.contains("p")) {
+			move.prefix = move.prefix.replace("p","");
+			flagPositionPrototype.captureFlag = Constants.JUMP_SLIDE_CONTINUE;
+		}else if(move.prefix.contains("g")) {
+			move.prefix = move.prefix.replace("g","");
+			flagPositionPrototype.captureFlag = Constants.JUMP_SLIDE_STOP;
+		}else {
+			flagPositionPrototype.captureFlag = Constants.JUMP_SLIDE_NO;
+		}
+		
+		return flagPositionPrototype;
 	}
 	
 	private static int getMoveType(BetzaMove move) {
